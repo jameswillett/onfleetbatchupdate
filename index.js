@@ -1,6 +1,5 @@
 const config = require('./.config');
 const onfleet = require('onfleet')(config.onfleet);
-const asyncLoop = require('node-async-loop');
 
 const getDCBikeBatch = async () => {
   try{
@@ -9,28 +8,34 @@ const getDCBikeBatch = async () => {
   } catch (err){
     console.log(err)
   }
-
 }
 
-//currently set to move all jobs to december 9th, between 9am and 9pm
-getDCBikeBatch()
-.then(tasks => {
-  asyncLoop(tasks, async (task, next) => {
-    try {
-      console.log(`moving ${task}...`);
-      const newCompleteAfter = new Date(2017, 11, 7, 9).getTime();
-      const newCompleteBefore = new Date(2017, 11, 7, 21).getTime();
-      await onfleet.tasks.update(task, {
-        "completeBefore": newCompleteBefore,
-        "completeAfter": newCompleteAfter
-      });
-    } catch (err){
-      console.log(err);
+const moveDCBikeBatch = async (tasks, i = 0) => {
+  if (!tasks.length) return console.log("no tasks :(")
+  try {
+    console.log(`moving ${tasks[i]}...`);
+    const newCompleteAfter = new Date(2017, 11, 12, 9).getTime();
+    const newCompleteBefore = new Date(2017, 11, 12, 21).getTime();
+    await onfleet.tasks.update(tasks[i], {
+      "completeBefore": newCompleteBefore,
+      "completeAfter": newCompleteAfter
+    });
+    if (i < tasks.length - 1){
+      setTimeout( async () => {
+        await moveDCBikeBatch(tasks, i + 1)
+      }, 50)
+    } else {
+      return console.log("done! :)")
     }
-    setTimeout(()=>{
-      next();
-    },50);
+  } catch (err){
+    console.log(err);
+  }
+}
 
-  });
-})
-.catch(console.log)
+const main = () => {
+  getDCBikeBatch()
+    .then(moveDCBikeBatch)
+    .catch(console.log)
+}
+
+main()
