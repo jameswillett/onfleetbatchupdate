@@ -3,7 +3,7 @@ const onfleet = require('onfleet')(config.onfleet);
 
 const getDCBikeBatch = async () => {
   try{
-    const { tasks } = await onfleet.workers.retrieve('jCiurZFM5jJ2MMsg6CXG8F5q');
+    const { tasks } = await onfleet.workers.retrieve(config.bikeBatch);
     return tasks
   } catch (err){
     console.log(err)
@@ -11,7 +11,7 @@ const getDCBikeBatch = async () => {
 }
 
 const moveDCBikeBatch = async (tasks, i = 0) => {
-  if (!tasks.length) return console.log("no tasks :(")
+  if (!tasks.length) return console.log("no tasks :(");
   try {
     console.log(`moving ${tasks[i]}...`);
     const newCompleteAfter = new Date(2017, 11, 12, 9).getTime();
@@ -25,7 +25,7 @@ const moveDCBikeBatch = async (tasks, i = 0) => {
         await moveDCBikeBatch(tasks, i + 1)
       }, 50)
     } else {
-      return console.log("done! :)")
+      return console.log("done! :)");
     }
   } catch (err){
     console.log(err);
